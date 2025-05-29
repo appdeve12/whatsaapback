@@ -3,16 +3,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, whatsappId } = req.body;  // accept whatsappId on registration
   try {
     const userExists = await User.findOne({ username });
     if (userExists) return res.status(400).json({ message: 'Username already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({ username, password: hashedPassword });
+    await User.create({ username, password: hashedPassword, whatsappId });
 
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -30,13 +31,12 @@ exports.login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 exports.logout = (req, res) => {
-  // Token-based logout
+  // For JWT, logout is client-side token discard
   res.json({ message: 'Logged out successfully' });
 };
-
-// Forgot/reset password feature based on email can be skipped or adapted
